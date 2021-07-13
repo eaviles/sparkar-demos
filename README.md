@@ -24,4 +24,14 @@ Some Spark AR demos made for the [Getting Started in Augmented Reality](https://
       </a>
     </td>
   </tr>
+  <tr>
+    <td>
+      <a href="./body-triangles">
+        <img src="./body-triangles/demo.gif" width="256" /><br />
+        body-triangles
+      </a>
+    </td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
 </table>
