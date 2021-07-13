@@ -18,7 +18,10 @@ Some Spark AR demos made for the [Getting Started in Augmented Reality](https://
       </a>
     </td>
     <td>
-      &nbsp;
+      <a href="./face-squares">
+        <img src="./face-squares/demo.gif" width="256" /><br />
+        face-squares
+      </a>
     </td>
   </tr>
 </table>
