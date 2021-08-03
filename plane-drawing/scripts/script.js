@@ -6,10 +6,8 @@ import Time from 'Time';
 import TouchGestures from 'TouchGestures';
 
 const spheres = [];
-let colorOffset = 0;
 let lastPoint = null;
 let nullObj;
-let planeTracker;
 let timer;
 let zIndex;
 
@@ -19,7 +17,6 @@ function removeSphere() {
 }
 
 async function onLongPressCallback(gesture) {
-  planeTracker.trackPoint(gesture.location, gesture.state);
   while (spheres.length > 0) removeSphere();
 }
 
@@ -38,11 +35,10 @@ async function onIntervalCallback(_time, data) {
   }
 
   zIndex += 0.0001;
-  colorOffset += 0.01;
   const thisPoint = Reactive.point(x, y, z + zIndex);
   if (lastPoint !== null) {
     const distance = Reactive.distance(lastPoint, thisPoint).pinLastValue();
-    if (distance > 0.0005) {
+    if (distance > 0.001) {
       lastPoint = thisPoint;
     } else return;
   } else {
@@ -52,7 +48,7 @@ async function onIntervalCallback(_time, data) {
   const sphere = await Blocks.instantiate('sphereBlock');
   sphere.transform.position = thisPoint;
   sphere.transform.scale = Reactive.point(0.5, 0.5, 0.5);
-  sphere.inputs.setScalar('colorOffset', x * y * z);
+  sphere.inputs.setScalar('colorOffset', x + y + z);
   Time.setTimeoutWithSnapshot(
     {
       x: sphere.transform.x,
@@ -75,15 +71,12 @@ function onPanCallback(gesture) {
       state: gesture.state,
     },
     onIntervalCallback,
-    1000 / 20
+    1000 / 30
   );
 }
 
 async function start() {
-  [nullObj, planeTracker] = await Promise.all([
-    Scene.root.findFirst('nullObject0'),
-    Scene.root.findFirst('planeTracker0'),
-  ]);
+  nullObj = await Scene.root.findFirst('nullObject0');
   TouchGestures.onLongPress().subscribe(onLongPressCallback);
   TouchGestures.onPan().subscribe(onPanCallback);
   Diagnostics.log('initiated');
