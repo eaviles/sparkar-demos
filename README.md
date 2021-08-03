@@ -2,7 +2,6 @@
 
 Some Spark AR demos made for the [Getting Started in Augmented Reality](https://sfpc.io/cocoon/programs/#augmented-reality) class.
 
-
 <table cellpadding="0" cellspacing="20" border="0">
   <tr>
     <td>
@@ -18,17 +17,37 @@ Some Spark AR demos made for the [Getting Started in Augmented Reality](https://
       </a>
     </td>
     <td>
-      <a href="./face-squares">
-        <img src="./face-squares/demo.gif" width="256" /><br />
-        face-squares
+      <a href="./body-triangles">
+        <img src="./body-triangles/demo.gif" width="256" /><br />
+        body-triangles
       </a>
     </td>
   </tr>
   <tr>
     <td>
-      <a href="./body-triangles">
-        <img src="./body-triangles/demo.gif" width="256" /><br />
-        body-triangles
+      <a href="./face-squares">
+        <img src="./face-squares/demo.gif" width="256" /><br />
+        face-squares
+      </a>
+    </td>
+    <td>
+      <a href="./face-mask">
+        <img src="./face-mask/demo.gif" width="256" /><br />
+        face-mask
+      </a>
+    </td>
+    <td>
+      <a href="./plane-spheres">
+        <img src="./plane-spheres/demo.gif" width="256" /><br />
+        plane-spheres
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="./plane-drawing">
+        <img src="./plane-drawing/demo.gif" width="256" /><br />
+        plane-drawing
       </a>
     </td>
     <td>&nbsp;</td>
