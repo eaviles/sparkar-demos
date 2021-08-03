@@ -1,129 +1,122 @@
 import Blocks from 'Blocks';
-import cannon from 'cannon';
+import CANNON from 'cannon';
 import Diagnostics from 'Diagnostics';
 import Reactive from 'Reactive';
 import Scene from 'Scene';
 import Time from 'Time';
 import TouchGestures from 'TouchGestures';
 
-let nullObj;
+let counter = 0;
+let ground;
+let lastTime;
 let planeTracker;
 let spheres = [];
 let world;
-let lastTime;
-let ground;
 
-function resetGround(data) {
-  const { planeX, planeY, planeZ } = data;
+function resetGround() {
   if (ground) world.removeBody(ground);
-  ground = new cannon.Body({
+  ground = new CANNON.Body({
     mass: 0,
-    position: new cannon.Vec3(0, 0, planeZ * 2),
-    shape: new cannon.Plane(),
+    position: new CANNON.Vec3(0, 0, 0),
+    shape: new CANNON.Plane(),
   });
-  Diagnostics.log(`ground: ${planeX}, ${planeY}, ${planeZ}`);
+  const xAxis = new CANNON.Vec3(1, 0, 0);
+  ground.quaternion.setFromAxisAngle(xAxis, -Math.PI / 2);
   world.addBody(ground);
 }
 
-function onLongPressCallbackDelayed(_, data) {
-  resetGround(data);
-}
-
-function getPlaneTrackerSnapshot() {
-  return {
-    planeX: planeTracker.worldTransform.x,
-    planeY: planeTracker.worldTransform.y,
-    planeZ: planeTracker.worldTransform.z,
-  };
+function removeSphere() {
+  if (spheres.length === 0) return;
+  const { instance, body } = spheres.shift();
+  world.removeBody(body);
+  Scene.destroy(instance);
 }
 
 async function onLongPressCallback(gesture) {
   planeTracker.trackPoint(gesture.location, gesture.state);
-  while (spheres.length > 0) {
-    const { instance, body } = spheres.pop();
-    if (cannon) world.removeBody(body);
-    Scene.destroy(instance);
-  }
-  if (cannon) {
-    const snapshot = getPlaneTrackerSnapshot();
-    Time.setTimeoutWithSnapshot(snapshot, onLongPressCallbackDelayed, 0);
-  }
-}
-
-async function onTapCallbackDelayed(_time, data) {
-  const { tapX, tapY, tapZ } = data;
-  const instance = await Blocks.instantiate('sphereBlock');
-  instance.transform.x = tapX;
-  instance.transform.y = tapY;
-  instance.transform.z = tapZ;
-  nullObj.addChild(instance);
-
-  let body;
-  if (cannon) {
-    body = new cannon.Body({
-      mass: 1,
-      position: new cannon.Vec3(tapX, tapY, tapZ),
-      shape: new cannon.Sphere(0.0275),
-    });
-    world.addBody(body);
-  }
-  spheres.push({ instance, body });
+  while (spheres.length > 0) removeSphere();
+  resetGround();
 }
 
 async function onTapCallback(gesture) {
-  const tapPoint = Scene.unprojectToFocalPlane(
-    Reactive.point2d(gesture.location.x, gesture.location.y)
+  while (spheres.length > 64) {
+    removeSphere();
+  }
+
+  counter += 0.5;
+  const x = Math.sin(counter) * 0.075;
+  const y = 0.5;
+  const z = Math.cos(counter) * 0.075;
+
+  const instance = await Blocks.instantiate('sphereBlock');
+  instance.transform.x = x;
+  instance.transform.y = y;
+  instance.transform.z = z;
+
+  Time.setTimeoutWithSnapshot(
+    {
+      x: instance.transform.x,
+      y: instance.transform.y,
+      z: instance.transform.z,
+    },
+    () => {
+      planeTracker.addChild(instance);
+      let body;
+      body = new CANNON.Body({
+        mass: 1,
+        position: new CANNON.Vec3(x, y, z),
+        shape: new CANNON.Sphere(0.04),
+      });
+      world.addBody(body);
+      const created = Date.now();
+      spheres.push({ instance, body, created });
+    },
+    0
   );
-  const snapshot = {
-    tapX: tapPoint.x,
-    tapY: tapPoint.y,
-    tapZ: tapPoint.z,
-  };
-  Time.setTimeoutWithSnapshot(snapshot, onTapCallbackDelayed, 0);
 }
 
 function onTimeCallback(time) {
-  if (lastTime != undefined) {
-    for (let i = 0; i < spheres.length; i += 1) {
-      const { instance, body } = spheres[i];
-      instance.transform.x = body.position.x;
-      instance.transform.y = body.position.y;
-      instance.transform.z = body.position.z;
-    }
-    const dt = (time - lastTime) / 1000;
-    world.step(1 / 60, dt, 3);
+  for (let i = 0; i < spheres.length; i += 1) {
+    const { instance, body } = spheres[i];
+    instance.transform.x = body.position.x;
+    instance.transform.y = body.position.y;
+    instance.transform.z = body.position.z;
+    const quaternion = Reactive.quaternion(
+      body.quaternion.w,
+      body.quaternion.x,
+      body.quaternion.y,
+      body.quaternion.z
+    );
+    instance.transform.rotation = quaternion;
   }
-  lastTime = time;
+  world.step(1 / 20);
 }
 
-function initPhysicsDelayed(_, data) {
-  resetGround(data);
-  Time.setInterval(onTimeCallback, 30);
+function onTimeCleanupCallback() {
+  while (spheres.length > 0 && Date.now() - spheres[0].created > 10000) {
+    removeSphere();
+  }
 }
 
 function initPhysics() {
-  world = new cannon.World();
-
-  world.gravity.set(0, 0, -2);
-  world.broadphase = new cannon.NaiveBroadphase();
+  world = new CANNON.World();
+  world.gravity.set(0, -2, 0);
+  world.broadphase = new CANNON.NaiveBroadphase();
   world.solver.iterations = 5;
   world.defaultContactMaterial.contactEquationStiffness = 5e6;
-  world.defaultContactMaterial.contactEquationRelaxation = 10;
   world.quatNormalizeFast = true;
   world.quatNormalizeSkip = 3;
 
-  const snapshot = getPlaneTrackerSnapshot();
-  Time.setTimeoutWithSnapshot(snapshot, initPhysicsDelayed, 0);
+  resetGround();
+  Time.setInterval(onTimeCallback, 1000 / 20);
+  Time.setInterval(onTimeCleanupCallback, 250);
 }
 
 async function start() {
-  [planeTracker, nullObj] = await Promise.all([
-    await Scene.root.findFirst('planeTracker0'),
-    await Scene.root.findFirst('nullObject0'),
-  ]);
+  planeTracker = await Scene.root.findFirst('planeTracker0');
   TouchGestures.onLongPress().subscribe(onLongPressCallback);
   TouchGestures.onTap().subscribe(onTapCallback);
-  if (cannon) initPhysics();
+  initPhysics();
   Diagnostics.log('initiated.');
 }
 
