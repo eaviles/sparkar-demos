@@ -37,20 +37,44 @@ Some Spark AR demos made for the [Getting Started in Augmented Reality](https://
       </a>
     </td>
     <td>
-      <a href="./plane-spheres">
-        <img src="./plane-spheres/demo.gif" width="256" /><br />
-        plane-spheres
+      <a href="./face-audio-analyzer">
+        <img src="./face-audio-analyzer/demo.gif" width="256" /><br />
+        face-audio-analyzer
       </a>
     </td>
   </tr>
   <tr>
+    <td>
+      <a href="./face-audio-energy">
+        <img src="./face-audio-energy/demo.gif" width="256" /><br />
+        face-audio-energy
+      </a>
+    </td>
+    <td>
+      <a href="./hand-light-drawing">
+        <img src="./hand-light-drawing/demo.gif" width="256" /><br />
+        hand-light-drawing
+      </a>
+    </td>
     <td>
       <a href="./plane-drawing">
         <img src="./plane-drawing/demo.gif" width="256" /><br />
         plane-drawing
       </a>
     </td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>
+      <a href="./marker-drawing">
+        <img src="./marker-drawing/demo.gif" width="256" /><br />
+        marker-drawing
+      </a>
+    </td>
+    <td>
+      <a href="./plane-spheres">
+        <img src="./plane-spheres/demo.gif" width="256" /><br />
+        plane-spheres
+      </a>
+    </td>
   </tr>
 </table>
